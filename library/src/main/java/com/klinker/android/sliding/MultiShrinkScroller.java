@@ -22,7 +22,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -33,14 +32,15 @@ import android.os.Build;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewConfiguration;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
@@ -50,8 +50,8 @@ import android.view.animation.PathInterpolator;
 import android.widget.EdgeEffect;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.Scroller;
 import android.widget.ScrollView;
+import android.widget.Scroller;
 import android.widget.TextView;
 
 /**
@@ -98,7 +98,7 @@ public class MultiShrinkScroller extends FrameLayout {
     /**
      * In portrait mode, the height:width ratio of the photo's starting height.
      */
-    private static final float INTERMEDIATE_HEADER_HEIGHT_RATIO = 0.6f;
+    private float intermediateHeaderHeightRatio = 0.6f;
 
     /**
      * Color blending will only be performed on the contact photo once the toolbar is compressed
@@ -285,6 +285,14 @@ public class MultiShrinkScroller extends FrameLayout {
         }
     }
 
+    public float getIntermediateHeaderHeightRatio() {
+        return intermediateHeaderHeightRatio;
+    }
+
+    public void setIntermediateHeaderHeightRatio(float intermediateHeaderHeightRatio) {
+        this.intermediateHeaderHeightRatio = intermediateHeaderHeightRatio;
+    }
+
     /**
      * This method must be called inside the Activity's onCreate. Initialize everything.
      */
@@ -357,7 +365,7 @@ public class MultiShrinkScroller extends FrameLayout {
                 if (!isTwoPanel) {
                     maximumHeaderHeight = getResources().getDimensionPixelSize(R.dimen.sliding_header_max_height);
                     intermediateHeaderHeight = (int) (maximumHeaderHeight
-                            * INTERMEDIATE_HEADER_HEIGHT_RATIO);
+                            * intermediateHeaderHeightRatio);
                 }
                 setHeaderHeight(getMaximumScrollableHeaderHeight());
                 maximumHeaderTextSize = largeTextView.getHeight();
@@ -1377,19 +1385,20 @@ public class MultiShrinkScroller extends FrameLayout {
         }
 
         final int gradientAlpha;
-        final float colorAlpha;
+        float colorAlpha;
         if (isTwoPanel) {
             colorAlpha = 0;
             gradientAlpha = 0x44;
         } else {
             float ratio = ((toolbarHeight - minimumHeaderHeight) /
-                    (float) (maximumHeaderHeight - minimumHeaderHeight));
-            if (toolbarHeight >= maximumHeaderHeight) {
+                    (float) (intermediateHeaderHeight - minimumHeaderHeight));
+
+            if (toolbarHeight >= intermediateHeaderHeight) {
                 colorAlpha = 0;
-            } else if (toolbarHeight >= intermediateHeaderHeight && toolbarHeight < maximumHeaderHeight) {
-                colorAlpha = (-0.25f * ratio) + .25f;
+            } else if (toolbarHeight <= intermediateHeaderHeight && toolbarHeight != minimumHeaderHeight) {
+                colorAlpha = 1 - ratio;
             } else {
-                colorAlpha = (-1.5f * ratio) + 1;
+                colorAlpha = 1;
             }
 
             gradientAlpha = 0;

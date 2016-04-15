@@ -22,7 +22,7 @@ Include the following in your gradle script:
 
 ```groovy
 dependencies {
-    compile 'com.klinkerapps:sliding-activity:1.1.1'
+    compile 'com.klinkerapps:sliding-activity:1.2.2'
 }
 ```
 
@@ -73,6 +73,16 @@ First, extend SlidingActivity. Instead of overriding onCreate(), instead overrid
  - enableFullscreen()
 
 More examples of possible activities can be found in the sample application and code snippets will be shown below.
+
+You can configure the scroller before it's initialised by overriding configureScroller(scroller)
+
+```java
+@Override
+    protected void configureScroller(MultiShrinkScroller scroller) {
+        super.configureScroller(scroller);
+        scroller.setIntermediateHeaderHeightRatio(1);
+    }
+```
 
 ## Activity Options
 
